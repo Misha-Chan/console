@@ -33,7 +33,21 @@ setTheme(currentTheme);
 // ===== تخصيص منطقة الحساب (اسم المستخدم / تسجيل خروج) =====
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+// إذا ما فيه توكن محلي، جرّب تسحبه بصمت من وسيط التحقق المركزي
+// (oauth.hostaka.fun) قبل ما نكمل
+async function pullOAuthSessionIfNeeded(){
+  if (localStorage.getItem('hostaka_token')) return;
+  try {
+    const r = await fetch('https://oauth.hostaka.fun/api/token', { credentials: 'include' });
+    if (r.ok) {
+      const d = await r.json();
+      if (d && d.token) localStorage.setItem('hostaka_token', d.token);
+    }
+  } catch (e) {}
+}
+
 async function initAuthArea(){
+  await pullOAuthSessionIfNeeded();
   const token = localStorage.getItem('hostaka_token') || '';
   const area = document.getElementById('clAuthArea');
   if (!token) return; // يبقى زر "تسجيل الدخول" الافتراضي

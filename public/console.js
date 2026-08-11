@@ -183,8 +183,23 @@ ${contribution}`;
   }
 }
 
+// إذا ما فيه توكن محلي، جرّب تسحبه بصمت من وسيط التحقق المركزي
+// (oauth.hostaka.fun) قبل ما نكمل — يغني عن الحاجة لرابط ?token= يدوي
+// بمعظم الحالات (المستخدم مسجّل دخول أصلاً بمكان ثاني بالمنظومة)
+async function pullOAuthSessionIfNeeded(){
+  if (TOKEN) return;
+  try {
+    const r = await fetch('https://oauth.hostaka.fun/api/token', { credentials: 'include' });
+    if (r.ok) {
+      const d = await r.json();
+      if (d && d.token) { TOKEN = d.token; localStorage.setItem('hostaka_token', TOKEN); }
+    }
+  } catch (e) {}
+}
+
 (async function checkSession(){
   showGate('loading');
+  await pullOAuthSessionIfNeeded();
   if(!TOKEN){ showGate('loggedOut'); return; }
   try{
     const r=await fetch('/api/auth/me',{headers:{'Authorization':'Bearer '+TOKEN}});
