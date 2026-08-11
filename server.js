@@ -1,0 +1,77 @@
+// ============================================================
+//  console — سيرفر مستقل للوحة التحكم وصفحة التعريف بالمشروع
+//  كل منطق المصادقة/قاعدة البيانات/صلاحيات الأدمن يبقى على السيرفر
+//  الرئيسي (hostaka.fun)؛ هذا السيرفر واجهة + بروكسي شفاف لـ /api/* تجاهه.
+// ============================================================
+const express = require('express');
+const path = require('path');
+const fetch = require('node-fetch');
+
+const app = express();
+
+const HOSTAKA_API_BASE = process.env.HOSTAKA_API_BASE || 'https://hostaka.fun';
+
+app.disable('x-powered-by');
+app.set('trust proxy', true);
+
+// ============================================================
+// بروكسي /api/* — نفس أسلوب orbithub وaethercast بالضبط
+// ============================================================
+app.use('/api', express.raw({ type: '*/*', limit: '10mb' }), async (req, res) => {
+  try {
+    const targetUrl = HOSTAKA_API_BASE + '/api' + req.url;
+
+    const headers = {};
+    for (const [key, value] of Object.entries(req.headers)) {
+      if (['host', 'connection', 'content-length', 'accept-encoding'].includes(key.toLowerCase())) continue;
+      headers[key] = value;
+    }
+
+    const hasBody = req.body && Buffer.isBuffer(req.body) && req.body.length > 0;
+    const upstream = await fetch(targetUrl, {
+      method: req.method,
+      headers,
+      body: hasBody ? req.body : undefined,
+      redirect: 'manual'
+    });
+
+    res.status(upstream.status);
+    upstream.headers.forEach((value, key) => {
+      if (['content-encoding', 'transfer-encoding', 'connection'].includes(key.toLowerCase())) return;
+      res.setHeader(key, value);
+    });
+
+    const buf = await upstream.buffer();
+    res.send(buf);
+  } catch (e) {
+    console.error('❌ console proxy error:', e);
+    res.status(502).json({ error: 'تعذر الاتصال بخادم هوستاكا الرئيسي' });
+  }
+});
+
+// ============================================================
+// ملفات ثابتة
+// ============================================================
+app.use(express.static(path.join(__dirname, 'public')));
+
+function sendPrivate(res, fileName) {
+  res.set('X-Robots-Tag', 'noindex, nofollow');
+  res.sendFile(path.join(__dirname, 'public', fileName));
+}
+
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html'))); // صفحة تعريفية عامة، قابلة للفهرسة
+app.get('/user/console', (req, res) => sendPrivate(res, 'console.html')); // لوحة خاصة، بدون فهرسة
+
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain').send('User-agent: *\nAllow: /\nDisallow: /user/\n');
+});
+
+// أي مسار غير معروف يرجع للصفحة الرئيسية التعريفية
+app.use((req, res) => res.redirect('/'));
+
+const PORT = process.env.PORT || 3000;
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`✅ console server running on port ${PORT} (proxying /api to ${HOSTAKA_API_BASE})`));
+}
+
+module.exports = app;

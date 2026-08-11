@@ -1,0 +1,76 @@
+body.page-console-landing {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-family, 'Ubuntu', sans-serif);
+}
+
+/* ===== شريط علوي ===== */
+.cl-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.cl-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.05rem; }
+.cl-brand-icon { width: 26px; height: 26px; border-radius: 8px; }
+.cl-brand-dim { color: var(--muted); font-weight: 500; }
+.cl-topbar-right { display: flex; align-items: center; gap: 10px; }
+.cl-icon-btn {
+  width: 36px; height: 36px; border-radius: var(--radius-full); border: 1px solid var(--border);
+  background: var(--card); color: var(--text); display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.cl-icon-btn:hover { background: var(--primary-light); }
+
+.cl-btn {
+  padding: 9px 18px; border-radius: var(--radius-full); border: 1px solid transparent;
+  font-weight: 700; font-size: 0.85rem; cursor: pointer; font-family: inherit;
+}
+.cl-btn-ghost { background: var(--card); border-color: var(--border); color: var(--text); }
+.cl-btn-ghost:hover { background: var(--primary-light); border-color: var(--primary-border); }
+
+.cl-user-chip {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px;
+  border-radius: var(--radius-full); background: var(--card); border: 1px solid var(--border);
+  font-weight: 700; font-size: 0.85rem; margin-left: 8px;
+}
+.cl-user-chip img, .cl-user-chip-fallback {
+  width: 24px; height: 24px; border-radius: 50%; object-fit: cover;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--primary); color: #fff; font-size: 0.75rem; font-weight: 800;
+}
+
+/* ===== المحتوى الرئيسي ===== */
+.cl-hero {
+  max-width: 720px; margin: 0 auto; padding: 64px 24px 80px;
+  text-align: center;
+}
+.cl-hero-icon { width: 64px; height: 64px; border-radius: 16px; margin-bottom: 20px; }
+.cl-hero h1 { font-size: 1.6rem; font-weight: 800; margin: 0 0 16px; }
+.cl-hero-desc {
+  color: var(--muted); line-height: 1.9; font-size: 0.95rem; margin: 0 auto 42px;
+  max-width: 600px;
+}
+
+.cl-buttons {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px; text-align: right;
+}
+@media (max-width: 560px) { .cl-buttons { grid-template-columns: 1fr; } }
+
+.cl-card-btn {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 18px; border-radius: var(--radius-lg); border: 1px solid var(--border);
+  background: var(--card); text-decoration: none; color: var(--text);
+  transition: all var(--transition-fast, 0.15s);
+}
+.cl-card-btn:hover { border-color: var(--primary-border); transform: translateY(-2px); box-shadow: var(--shadow); }
+.cl-card-btn-icon {
+  flex-shrink: 0; width: 42px; height: 42px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--primary-light); color: var(--primary);
+}
+.cl-card-btn-title { font-weight: 800; font-size: 0.95rem; }
+.cl-card-btn-sub { color: var(--muted); font-size: 0.78rem; margin-top: 2px; direction: ltr; text-align: right; }
+
+.cl-card-btn-primary { border-color: var(--primary); }
+.cl-card-btn-primary .cl-card-btn-icon { background: var(--primary); color: #fff; }
