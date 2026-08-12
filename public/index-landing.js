@@ -58,18 +58,14 @@ async function initAuthArea(){
     if (!u || u.error) return;
 
     area.innerHTML = `
-      <span class="cl-user-chip">
-        ${u.avatar ? `<img src="${esc(u.avatar)}" alt="">` : `<span class="cl-user-chip-fallback">${esc(u.username.charAt(0).toUpperCase())}</span>`}
-        <span>@${esc(u.username)}</span>
-      </span>
-      <button class="cl-btn cl-btn-ghost" onclick="doLogout()">تسجيل خروج</button>
+      <div class="cl-user-row">
+        ${u.avatar ? `<img src="${esc(u.avatar)}" alt="" class="cl-user-avatar">` : `<span class="cl-user-avatar-fallback">${esc(u.username.charAt(0).toUpperCase())}</span>`}
+        <span class="cl-user-meta"><span class="cl-user-name">@${esc(u.username)}</span></span>
+        <button class="cl-user-logout" onclick="doLogout()" title="تسجيل خروج">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
     `;
-
-    // خلي زر "لوحتك" واضح لو المستخدم أدمن فعلاً (تحسين بصري بسيط،
-    // التحقق الفعلي من الصلاحية يصير على صفحة /user/console نفسها)
-    if (u.role === 'admin') {
-      document.getElementById('consoleBtn').classList.add('cl-card-btn-primary');
-    }
   } catch (e) { /* تجاهل — يبقى زر تسجيل الدخول الافتراضي */ }
 }
 

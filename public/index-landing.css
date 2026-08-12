@@ -1,76 +1,128 @@
 body.page-console-landing {
+  margin: 0;
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-family, 'Ubuntu', sans-serif);
 }
 
-/* ===== شريط علوي ===== */
-.cl-topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--border);
+.cl-shell {
+  display: flex;
+  min-height: 100vh;
 }
-.cl-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.05rem; }
+
+/* ===== الشريط الجانبي ===== */
+.cl-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-inline-start: 1px solid var(--border);
+  background: var(--card);
+  padding: 18px 14px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.cl-brand {
+  display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1rem;
+  padding: 6px 8px 18px;
+}
 .cl-brand-icon { width: 26px; height: 26px; border-radius: 8px; }
 .cl-brand-dim { color: var(--muted); font-weight: 500; }
-.cl-topbar-right { display: flex; align-items: center; gap: 10px; }
+
+.cl-nav { display: flex; flex-direction: column; gap: 2px; }
+.cl-nav-sep { height: 1px; background: var(--border); margin: 10px 6px; }
+
+.cl-nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 10px; border-radius: var(--radius-md);
+  text-decoration: none; color: var(--text);
+  transition: background var(--transition-fast, 0.15s);
+}
+.cl-nav-item:hover { background: var(--primary-light); }
+.cl-nav-icon {
+  flex-shrink: 0; width: 34px; height: 34px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--input-bg, var(--bg)); color: var(--muted);
+}
+.cl-nav-item:hover .cl-nav-icon { color: var(--primary); }
+.cl-nav-text { display: flex; flex-direction: column; min-width: 0; }
+.cl-nav-title { font-weight: 700; font-size: 0.88rem; }
+.cl-nav-sub { color: var(--muted); font-size: 0.72rem; direction: ltr; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.cl-nav-item-primary { background: var(--primary-light); border: 1px solid var(--primary-border); }
+.cl-nav-item-primary .cl-nav-icon { background: var(--primary); color: #fff; }
+.cl-nav-item-primary:hover { background: var(--primary-light); }
+
+.cl-sidebar-spacer { flex: 1; }
+
+/* ===== ذيل الشريط الجانبي (الثيم + الحساب)، مثبّت بالأسفل ===== */
+.cl-sidebar-footer {
+  display: flex; align-items: center; gap: 8px;
+  padding-top: 12px; border-top: 1px solid var(--border);
+}
 .cl-icon-btn {
-  width: 36px; height: 36px; border-radius: var(--radius-full); border: 1px solid var(--border);
-  background: var(--card); color: var(--text); display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; width: 36px; height: 36px; border-radius: var(--radius-full); border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center;
   cursor: pointer;
 }
 .cl-icon-btn:hover { background: var(--primary-light); }
 
-.cl-btn {
-  padding: 9px 18px; border-radius: var(--radius-full); border: 1px solid transparent;
-  font-weight: 700; font-size: 0.85rem; cursor: pointer; font-family: inherit;
-}
-.cl-btn-ghost { background: var(--card); border-color: var(--border); color: var(--text); }
-.cl-btn-ghost:hover { background: var(--primary-light); border-color: var(--primary-border); }
+.cl-auth-area { flex: 1; min-width: 0; }
 
-.cl-user-chip {
-  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px;
-  border-radius: var(--radius-full); background: var(--card); border: 1px solid var(--border);
-  font-weight: 700; font-size: 0.85rem; margin-left: 8px;
+.cl-btn {
+  padding: 9px 16px; border-radius: var(--radius-full); border: 1px solid transparent;
+  font-weight: 700; font-size: 0.82rem; cursor: pointer; font-family: inherit;
 }
-.cl-user-chip img, .cl-user-chip-fallback {
-  width: 24px; height: 24px; border-radius: 50%; object-fit: cover;
+.cl-btn-ghost { background: var(--bg); border-color: var(--border); color: var(--text); }
+.cl-btn-ghost:hover { background: var(--primary-light); border-color: var(--primary-border); }
+.cl-btn-full { width: 100%; }
+
+.cl-user-row {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 6px 8px;
+}
+.cl-user-avatar, .cl-user-avatar-fallback {
+  flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; object-fit: cover;
   display: flex; align-items: center; justify-content: center;
-  background: var(--primary); color: #fff; font-size: 0.75rem; font-weight: 800;
+  background: var(--primary); color: #fff; font-size: 0.8rem; font-weight: 800;
 }
+.cl-user-meta { flex: 1; min-width: 0; }
+.cl-user-name { font-weight: 700; font-size: 0.82rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cl-user-logout {
+  flex-shrink: 0; width: 28px; height: 28px; border-radius: var(--radius-md); border: none;
+  background: transparent; color: var(--muted); display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.cl-user-logout:hover { background: var(--primary-light); color: var(--primary); }
 
 /* ===== المحتوى الرئيسي ===== */
-.cl-hero {
-  max-width: 720px; margin: 0 auto; padding: 64px 24px 80px;
-  text-align: center;
-}
-.cl-hero-icon { width: 64px; height: 64px; border-radius: 16px; margin-bottom: 20px; }
-.cl-hero h1 { font-size: 1.6rem; font-weight: 800; margin: 0 0 16px; }
-.cl-hero-desc {
-  color: var(--muted); line-height: 1.9; font-size: 0.95rem; margin: 0 auto 42px;
-  max-width: 600px;
-}
-
-.cl-buttons {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 14px; text-align: right;
-}
-@media (max-width: 560px) { .cl-buttons { grid-template-columns: 1fr; } }
-
-.cl-card-btn {
-  display: flex; align-items: center; gap: 14px;
-  padding: 16px 18px; border-radius: var(--radius-lg); border: 1px solid var(--border);
-  background: var(--card); text-decoration: none; color: var(--text);
-  transition: all var(--transition-fast, 0.15s);
-}
-.cl-card-btn:hover { border-color: var(--primary-border); transform: translateY(-2px); box-shadow: var(--shadow); }
-.cl-card-btn-icon {
-  flex-shrink: 0; width: 42px; height: 42px; border-radius: var(--radius-md);
+.cl-main {
+  flex: 1; min-width: 0;
   display: flex; align-items: center; justify-content: center;
-  background: var(--primary-light); color: var(--primary);
+  padding: 40px 24px;
 }
-.cl-card-btn-title { font-weight: 800; font-size: 0.95rem; }
-.cl-card-btn-sub { color: var(--muted); font-size: 0.78rem; margin-top: 2px; direction: ltr; text-align: right; }
+.cl-hero { max-width: 560px; text-align: center; }
+.cl-hero-icon { width: 56px; height: 56px; border-radius: 14px; margin-bottom: 18px; }
+.cl-hero h1 { font-size: 1.4rem; font-weight: 800; margin: 0 0 14px; }
+.cl-hero-desc { color: var(--muted); line-height: 1.9; font-size: 0.92rem; margin: 0; }
 
-.cl-card-btn-primary { border-color: var(--primary); }
-.cl-card-btn-primary .cl-card-btn-icon { background: var(--primary); color: #fff; }
+/* ===== موبايل: الشريط الجانبي يصير شريط أفقي أعلى الصفحة ===== */
+@media (max-width: 760px) {
+  .cl-shell { flex-direction: column; }
+  .cl-sidebar {
+    width: 100%; height: auto; position: static;
+    border-inline-start: none; border-bottom: 1px solid var(--border);
+    flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px;
+  }
+  .cl-brand { padding: 6px 4px; }
+  .cl-nav { flex-direction: row; flex-wrap: wrap; flex: 1; }
+  .cl-nav-sep { display: none; }
+  .cl-nav-item { padding: 8px; }
+  .cl-nav-sub { display: none; }
+  .cl-sidebar-spacer { display: none; }
+  .cl-sidebar-footer { border-top: none; padding-top: 0; width: 100%; }
+}
