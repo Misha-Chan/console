@@ -32,6 +32,11 @@ const LANG = {
     disable2FATitle: 'لو المستخدم محظور دخوله بسبب مشكلة بكود المصادقة الثنائية', disable2FABtn: 'إلغاء 2FA',
     del: 'حذف', fetchUsersFail: 'فشل تحميل المستخدمين', confirmPromote: 'ترقية هذا المستخدم لـ admin؟',
     promoted: 'تمت الترقية', confirmDeleteUser: 'حذف {name}؟', deleted: 'تم الحذف',
+    promoteToModerator: 'ترقية لمشرف', promoteToAdmin: 'ترقية لأدمن', demote: 'تنزيل لعضو',
+    confirmPromoteModerator: 'ترقية هذا المستخدم لمشرف (moderator)؟', confirmDemote: 'تنزيل هذا المستخدم لعضو عادي؟',
+    demoted: 'تم التنزيل', suspendPostReasonPrompt: 'سبب تعليق المنشور (اختياري):',
+    confirmUnsuspendPost: 'إلغاء تعليق هذا المنشور؟', postSuspendedToast: 'تم تعليق المنشور',
+    postUnsuspendedToast: 'تم إلغاء تعليق المنشور',
     suspendReasonPrompt: 'سبب تعليق حساب @{name} (اختياري):', suspendedToast: 'تم تعليق الحساب',
     confirmUnsuspend: 'رفع التعليق عن @{name}؟', unsuspendedToast: 'تم رفع التعليق',
     confirmDisable2FA: 'إلغاء تفعيل المصادقة الثنائية لحساب @{name}؟ استخدم هذا فقط لو المستخدم محظور دخوله بسبب مشكلة بكود المصادقة.',
@@ -59,6 +64,11 @@ const LANG = {
     disable2FATitle: 'Use only if the user is locked out due to a two-factor code issue', disable2FABtn: 'Disable 2FA',
     del: 'Delete', fetchUsersFail: 'Failed to load users', confirmPromote: 'Promote this user to admin?',
     promoted: 'Promoted', confirmDeleteUser: 'Delete {name}?', deleted: 'Deleted',
+    promoteToModerator: 'Promote to Moderator', promoteToAdmin: 'Promote to Admin', demote: 'Demote to user',
+    confirmPromoteModerator: 'Promote this user to moderator?', confirmDemote: 'Demote this user back to a regular member?',
+    demoted: 'Demoted', suspendPostReasonPrompt: 'Reason for suspending this post (optional):',
+    confirmUnsuspendPost: 'Unsuspend this post?', postSuspendedToast: 'Post suspended',
+    postUnsuspendedToast: 'Post unsuspended',
     suspendReasonPrompt: 'Reason for suspending @{name} (optional):', suspendedToast: 'Account suspended',
     confirmUnsuspend: 'Unsuspend @{name}?', unsuspendedToast: 'Suspension lifted',
     confirmDisable2FA: 'Disable two-factor authentication for @{name}? Use this only if the user is locked out due to a 2FA code issue.',
@@ -127,7 +137,16 @@ function initAdmin(username){
   document.getElementById('sidebar').style.display='flex';
   document.getElementById('mainContent').style.display='block';
   document.getElementById('adminName').textContent=username;
-  loadDashboard();
+
+  // المشرف (moderator) رتبة محدودة: يشوف بس المستخدمين، المنشورات،
+  // والبلاغات — بقية الأقسام (Dashboard، التوثيق، الإشعارات، السجلات)
+  // مخصصة للأدمن فقط، نخفيها من الشريط الجانبي
+  if (MY_ROLE === 'moderator') {
+    document.querySelectorAll('.nav-item[data-admin-only="1"]').forEach(el => el.style.display = 'none');
+    showPage('users');
+  } else {
+    loadDashboard();
+  }
 }
 
 // طلب الانضمام — يُرسَل كبلاغ (report) من نوع خاص، يوصل لوحة البلاغات
@@ -197,6 +216,8 @@ async function pullOAuthSessionIfNeeded(){
   } catch (e) {}
 }
 
+let MY_ROLE = ''; // 'admin' | 'moderator' — يُضبط بعد التحقق من الجلسة، يُستخدم لتقييد الواجهة
+
 (async function checkSession(){
   showGate('loading');
   await pullOAuthSessionIfNeeded();
@@ -205,7 +226,8 @@ async function pullOAuthSessionIfNeeded(){
     const r=await fetch('/api/auth/me',{headers:{'Authorization':'Bearer '+TOKEN}});
     const u=await r.json();
     if(!u||u.error){ TOKEN=''; localStorage.removeItem('hostaka_token'); showGate('loggedOut'); return; }
-    if(u.role!=='admin'){ showGate('notAdmin'); return; }
+    if(u.role!=='admin' && u.role!=='moderator'){ showGate('notAdmin'); return; }
+    MY_ROLE = u.role;
     initAdmin(u.username);
   }catch(e){ showGate('loggedOut'); }
 })();
@@ -214,7 +236,7 @@ function showPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
-  event?.currentTarget?.classList.add('active');
+  document.querySelector('.nav-item[data-page="'+name+'"]')?.classList.add('active');
   if(name==='users') loadUsers();
   if(name==='posts') loadPosts();
   if(name==='verify') loadVerify();
@@ -389,11 +411,13 @@ async function clearLogs(){
 async function loadUsers(){
   try{
     const users=await api('/api/admin/users');
+    const roleBadge = (role) => role==='admin' ? 'admin' : (role==='moderator' ? 'moderator' : 'user');
+    const roleLabel = (role) => role==='admin' ? 'Admin' : (role==='moderator' ? 'Moderator' : 'User');
     document.getElementById('usersTable').innerHTML=users.map(u=>`
       <tr>
         <td><strong>${esc(u.display_name||u.username)}</strong><div style="font-size:0.75rem;color:var(--muted);">@${esc(u.username)}</div></td>
         <td style="font-size:0.82rem;color:var(--muted);" dir="ltr">${esc(u.email)}</td>
-        <td><span class="badge badge-${u.role==='admin'?'admin':'user'}">${u.role==='admin'?'Admin':'User'}</span></td>
+        <td><span class="badge badge-${roleBadge(u.role)}">${roleLabel(u.role)}</span></td>
         <td>${u.verified?'<svg width="14" height="14" viewBox="0 0 24 24" fill="#3b9eff"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>':'–'}</td>
         <td>
           ${u.suspended
@@ -402,21 +426,33 @@ async function loadUsers(){
         </td>
         <td>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            ${u.role!=='admin'?`<button class="btn btn-dark btn-sm" onclick="promoteUser(${u.id})">${t('promote')}</button>`:''}
+            ${MY_ROLE==='admin' && u.role==='user'?`<button class="btn btn-dark btn-sm" onclick="promoteToModerator(${u.id})">${t('promoteToModerator')}</button>`:''}
+            ${MY_ROLE==='admin' && u.role!=='admin'?`<button class="btn btn-dark btn-sm" onclick="promoteToAdmin(${u.id})">${t('promoteToAdmin')}</button>`:''}
+            ${MY_ROLE==='admin' && u.role==='moderator'?`<button class="btn btn-ghost btn-sm" onclick="demoteUser(${u.id})">${t('demote')}</button>`:''}
             ${u.role!=='admin' && !u.suspended?`<button class="btn btn-ghost btn-sm" onclick="suspendUser(${u.id},'${esc(u.username)}')" style="color:var(--danger);">${t('suspend')}</button>`:''}
             ${u.role!=='admin' && u.suspended?`<button class="btn btn-ghost btn-sm" onclick="unsuspendUser(${u.id},'${esc(u.username)}')" style="color:#15803d;">${t('unsuspend')}</button>`:''}
-            ${Number(u.totp_enabled)===1?`<button class="btn btn-ghost btn-sm" onclick="adminDisable2FA(${u.id},'${esc(u.username)}')" style="color:#a16207;" title="${t('disable2FATitle')}">${t('disable2FABtn')}</button>`:''}
-            ${u.role!=='admin'?`<button class="btn btn-ghost btn-sm" onclick="deleteUser(${u.id},'${esc(u.username)}')">${t('del')}</button>`:''}
+            ${MY_ROLE==='admin' && Number(u.totp_enabled)===1?`<button class="btn btn-ghost btn-sm" onclick="adminDisable2FA(${u.id},'${esc(u.username)}')" style="color:#a16207;" title="${t('disable2FATitle')}">${t('disable2FABtn')}</button>`:''}
+            ${MY_ROLE==='admin' && u.role!=='admin'?`<button class="btn btn-ghost btn-sm" onclick="deleteUser(${u.id},'${esc(u.username)}')">${t('del')}</button>`:''}
           </div>
         </td>
       </tr>`).join('');
   }catch(e){toast(t('fetchUsersFail'));}
 }
 
-async function promoteUser(id){
+async function promoteToModerator(id){
+  if(!await hostakaConfirm(t('confirmPromoteModerator'))) return;
+  await api('/api/admin/users/'+id+'/role','PUT',{role:'moderator'});
+  toast(t('promoted')); loadUsers();
+}
+async function promoteToAdmin(id){
   if(!await hostakaConfirm(t('confirmPromote'))) return;
   await api('/api/admin/users/'+id+'/role','PUT',{role:'admin'});
   toast(t('promoted')); loadUsers();
+}
+async function demoteUser(id){
+  if(!await hostakaConfirm(t('confirmDemote'))) return;
+  await api('/api/admin/users/'+id+'/role','PUT',{role:'user'});
+  toast(t('demoted')); loadUsers();
 }
 async function deleteUser(id,name){
   if(!await hostakaConfirm(t('confirmDeleteUser',{name}))) return;
@@ -443,22 +479,42 @@ async function adminDisable2FA(id,name){
 
 async function loadPosts(){
   try{
-    const posts=await api('/api/records');
+    const posts=await api('/api/admin/posts');
     const el=document.getElementById('postsList');
     if(!posts.length){el.innerHTML=`<div style="text-align:center;color:var(--muted);padding:24px;">${t('noPosts')}</div>`;return;}
     el.innerHTML=posts.map(p=>`
       <div style="border-bottom:1px solid var(--border);padding:14px 0;display:flex;gap:12px;align-items:flex-start;">
         <div style="flex:1;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-            <strong style="font-size:0.88rem;">${esc(p.publisher)}</strong>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+            <strong style="font-size:0.88rem;">${esc(p.publisher_name||p.publisher)}</strong>
             <span class="badge badge-${p.user_role==='Admin'?'admin':'user'}">${esc(p.user_role)}</span>
+            ${Number(p.suspended)===1?`<span class="badge badge-suspended" title="${esc(p.suspend_reason||'')}">${t('suspended')}</span>`:''}
             <span style="font-size:0.75rem;color:var(--muted);">${fmtDate(p.created_at)}</span>
           </div>
           <div style="font-size:0.85rem;color:#444;line-height:1.6;">${(p.content||'').replace(/<[^>]+>/g,'').slice(0,120)}${(p.content||'').length>120?'...':''}</div>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="deletePost(${p.id})">${t('del')}</button>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          ${Number(p.suspended)===1
+            ? `<button class="btn btn-ghost btn-sm" onclick="unsuspendPost(${p.id})" style="color:#15803d;">${t('unsuspend')}</button>`
+            : `<button class="btn btn-ghost btn-sm" onclick="suspendPost(${p.id})" style="color:var(--danger);">${t('suspend')}</button>`}
+          ${MY_ROLE==='admin'?`<button class="btn btn-ghost btn-sm" onclick="deletePost(${p.id})">${t('del')}</button>`:''}
+        </div>
       </div>`).join('');
   }catch(e){toast(t('fetchPostsFail'));}
+}
+
+async function suspendPost(id){
+  const reason = await hostakaPrompt(t('suspendPostReasonPrompt'),'');
+  if(reason===null) return;
+  const d = await api('/api/admin/posts/'+id+'/suspend','PUT',{reason});
+  if(d.success){ toast(t('postSuspendedToast')); loadPosts(); }
+  else toast(d.error||t('execFail'));
+}
+async function unsuspendPost(id){
+  if(!await hostakaConfirm(t('confirmUnsuspendPost'))) return;
+  const d = await api('/api/admin/posts/'+id+'/unsuspend','PUT');
+  if(d.success){ toast(t('postUnsuspendedToast')); loadPosts(); }
+  else toast(d.error||t('execFail'));
 }
 
 async function deletePost(id){
