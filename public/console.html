@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>لوحتك — console.hostaka.fun</title>
+  <title data-i18n="admin.pageTitle">لوحتك — console.hostaka.fun</title>
   <link rel="icon" href="/console-icon.png" type="image/png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,38 +25,38 @@
 <!-- حالة التحميل / غير مسجّل دخول / عضو بدون رتبة (بديل شاشة الدخول القديمة) -->
 <div id="gateScreen">
   <div class="login-box" id="gateLoading">
-    <div class="login-title">جارٍ التحقق من صلاحياتك...</div>
+    <div class="login-title" data-i18n="console.verifyingAccess">جارٍ التحقق من صلاحياتك...</div>
   </div>
 
   <div class="login-box" id="gateLoggedOut" style="display:none;">
-    <div class="login-title">لوحتك</div>
-    <div class="login-sub">سجّل دخولك بحساب هوستاكا الأساسي أولاً</div>
-    <button class="btn-login-submit" onclick="goToLogin()">تسجيل الدخول</button>
+    <div class="login-title" data-i18n="console.yourConsole">لوحتك</div>
+    <div class="login-sub" data-i18n="console.loginFirst">سجّل دخولك بحساب هوستاكا الأساسي أولاً</div>
+    <button class="btn-login-submit" onclick="goToLogin()" data-i18n="console.loginBtn">تسجيل الدخول</button>
   </div>
 
   <div class="login-box" id="gateNotAdmin" style="display:none;max-width:480px;">
-    <div class="login-title">أوبس، ما عندك صلاحيات إدارية! 🙂</div>
-    <div class="login-sub" style="margin-bottom:18px;">يمكنك الإنضمام إلى المشروع عبر الخطوات التالية</div>
+    <div class="login-title" data-i18n="console.notAdminTitle">أوبس، ما عندك صلاحيات إدارية! 🙂</div>
+    <div class="login-sub" style="margin-bottom:18px;" data-i18n="console.joinSteps">يمكنك الإنضمام إلى المشروع عبر الخطوات التالية</div>
     <div class="alert alert-err" id="joinErr" style="display:none;"></div>
-    <div class="alert" id="joinOk" style="display:none;background:var(--primary-light);color:var(--primary);border-color:var(--primary-border);">تم إرسال طلبك للإدارة، بنراجعه ونرد عليك قريباً 🙂</div>
+    <div class="alert" id="joinOk" style="display:none;background:var(--primary-light);color:var(--primary);border-color:var(--primary-border);" data-i18n="console.joinSuccessMsg">تم إرسال طلبك للإدارة، بنراجعه ونرد عليك قريباً 🙂</div>
 
     <div id="joinFormWrap">
-      <label class="form-label">تاريخ الميلاد</label>
+      <label class="form-label" data-i18n="console.fieldBirthdate">تاريخ الميلاد</label>
       <input class="form-input" type="date" id="joinBirthdate">
 
-      <label class="form-label">البريد الإلكتروني</label>
+      <label class="form-label" data-i18n="console.fieldEmail">البريد الإلكتروني</label>
       <input class="form-input" type="email" id="joinEmail" dir="ltr">
 
-      <label class="form-label">الاسم الكامل</label>
+      <label class="form-label" data-i18n="console.fieldFullName">الاسم الكامل</label>
       <input class="form-input" type="text" id="joinFullName">
 
-      <label class="form-label">سبب رغبتك بالانضمام</label>
+      <label class="form-label" data-i18n="console.fieldReason">سبب رغبتك بالانضمام</label>
       <textarea class="form-input" id="joinReason" rows="3" style="resize:vertical;"></textarea>
 
-      <label class="form-label">تفاصيل ما تريد المساهمة به</label>
+      <label class="form-label" data-i18n="console.fieldContribution">تفاصيل ما تريد المساهمة به</label>
       <textarea class="form-input" id="joinContribution" rows="3" style="resize:vertical;"></textarea>
 
-      <button class="btn-login-submit" id="joinSendBtn" onclick="sendJoinRequest()">إرسال الطلب</button>
+      <button class="btn-login-submit" id="joinSendBtn" onclick="sendJoinRequest()" data-i18n="console.sendRequest">إرسال الطلب</button>
     </div>
   </div>
 </div>
@@ -114,6 +114,14 @@
   </nav>
   <div class="sidebar-footer">
     <div class="user-info"><span data-i18n="admin.loggedInAs">Logged in as</span> <span id="adminName"></span></div>
+    <div class="lang-selector" id="langToggle" onclick="toggleLangMenu()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      <span data-i18n="common.changeLanguage">Change language</span>
+      <div class="lang-menu" id="langMenu">
+        <button onclick="setLang('ar')">العربية</button>
+        <button onclick="setLang('en')">English</button>
+      </div>
+    </div>
     <button class="btn-logout" onclick="doLogout()" data-i18n="admin.logout">Log Out</button>
   </div>
 </aside>

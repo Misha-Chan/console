@@ -47,6 +47,7 @@ const LANG = {
     reportTypePost: 'منشور', reportTypeComment: 'تعليق', reportTypeMessage: 'رسالة', reportTypeUser: 'مستخدم',
     reportTypeGeneral: 'عام', reportTypeBug: 'مشكلة تقنية', reportTypeAbuse: 'إساءة استخدام',
     reportTypeAccount: 'مشكلة حساب', reportTypeSuggestion: 'اقتراح', reportTypeJoinRequest: 'طلب انضمام للفريق',
+    fillAllFields: 'الرجاء تعبئة كل الحقول', sendRequestBtn: 'إرسال الطلب',
     reportStatusPending: 'قيد المراجعة', reportStatusResolved: 'تم الحل', reportStatusDismissed: 'مرفوض',
     reporterDefault: 'مستخدم', againstPrefix: '← بحق @', prevReply: 'ردك السابق',
     replyPlaceholder: 'اكتب رداً (اختياري)...', resolveReply: 'حل + رد', noReportsHere: 'لا توجد بلاغات هنا',
@@ -79,6 +80,7 @@ const LANG = {
     reportTypePost: 'Post', reportTypeComment: 'Comment', reportTypeMessage: 'Message', reportTypeUser: 'User',
     reportTypeGeneral: 'General', reportTypeBug: 'Technical issue', reportTypeAbuse: 'Abuse',
     reportTypeAccount: 'Account issue', reportTypeSuggestion: 'Suggestion', reportTypeJoinRequest: 'Team join request',
+    fillAllFields: 'Please fill in all fields', sendRequestBtn: 'Send request',
     reportStatusPending: 'Pending', reportStatusResolved: 'Resolved', reportStatusDismissed: 'Dismissed',
     reporterDefault: 'User', againstPrefix: '← against @', prevReply: 'Your previous reply',
     replyPlaceholder: 'Write a reply (optional)...', resolveReply: 'Resolve + reply', noReportsHere: 'No reports here',
@@ -91,6 +93,45 @@ function t(key, vars){
   if (s === undefined) return key;
   if (vars) Object.keys(vars).forEach(function(k){ s = s.replace('{'+k+'}', vars[k]); });
   return s;
+}
+
+// ============================================================
+// تبديل اللغة — بيحدّث نظامين بنفس الوقت:
+// 1) العناصر الثابتة (data-i18n) عبر i18n.js المشترك مع بقية المنصة
+// 2) المحتوى المُولَّد ديناميكياً بجافاسكريبت هنا (جداول، أزرار، توست...)
+//    اللي يعتمد على LANG المحلي فوق — نعيد رسم الصفحة النشطة حالياً بعدها
+// ============================================================
+function toggleLangMenu(){
+  document.getElementById('langMenu').classList.toggle('show');
+}
+document.addEventListener('click', function(e){
+  var wrap = document.getElementById('langToggle');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('langMenu')?.classList.remove('show');
+  }
+});
+
+function setLang(lang){
+  if (lang !== 'ar' && lang !== 'en') return;
+  currentLang = lang;
+  localStorage.setItem('hostaka_lang', lang);
+  if (window.setHostakaLang) window.setHostakaLang(lang); // يحدّث كل عناصر data-i18n تلقائياً
+  document.getElementById('langMenu')?.classList.remove('show');
+  reRenderActivePage();
+}
+
+// يعيد رسم أي محتوى مبني بجافاسكريبت بالصفحة النشطة حالياً، عشان يتحدّث
+// فوراً بدون ما يحتاج المستخدم يعيد تحميل الصفحة بعد تبديل اللغة
+function reRenderActivePage(){
+  var active = document.querySelector('.page.active');
+  if (!active) return;
+  var id = active.id || '';
+  if (id === 'page-dashboard') loadDashboard();
+  else if (id === 'page-users') loadUsers();
+  else if (id === 'page-posts') loadPosts();
+  else if (id === 'page-verify') loadVerify();
+  else if (id === 'page-reports') loadReports();
+  else if (id === 'page-logs') loadLogs();
 }
 
 // ===== Theme =====
@@ -162,13 +203,13 @@ async function sendJoinRequest(){
   errEl.style.display = 'none'; okEl.style.display = 'none';
 
   if(!birthdate || !email || !fullName || !reason || !contribution){
-    errEl.textContent = 'الرجاء تعبئة كل الحقول';
+    errEl.textContent = t('fillAllFields');
     errEl.style.display = 'block';
     return;
   }
 
   const btn = document.getElementById('joinSendBtn');
-  btn.disabled = true; btn.textContent = 'جارٍ الإرسال...';
+  btn.disabled = true; btn.textContent = t('sending');
 
   const bodyText =
 `تاريخ الميلاد: ${birthdate}
@@ -193,12 +234,12 @@ ${contribution}`;
     } else {
       errEl.textContent = d?.error || t('connFail');
       errEl.style.display = 'block';
-      btn.disabled = false; btn.textContent = 'إرسال الطلب';
+      btn.disabled = false; btn.textContent = t('sendRequestBtn');
     }
   } catch(e){
     errEl.textContent = t('connFail');
     errEl.style.display = 'block';
-    btn.disabled = false; btn.textContent = 'إرسال الطلب';
+    btn.disabled = false; btn.textContent = t('sendRequestBtn');
   }
 }
 

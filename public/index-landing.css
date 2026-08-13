@@ -70,6 +70,27 @@ body.page-console-landing {
 }
 .cl-icon-btn:hover { background: var(--primary-light); }
 
+.cl-lang-selector {
+  position: relative; flex-shrink: 0; width: 36px; height: 36px; border-radius: var(--radius-full);
+  border: 1px solid var(--border); background: var(--bg); color: var(--text);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.cl-lang-selector:hover { background: var(--primary-light); color: var(--primary); }
+.cl-lang-menu {
+  position: absolute; bottom: calc(100% + 8px); right: 0;
+  background: var(--modal-bg); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 6px 0; min-width: 130px; opacity: 0; visibility: hidden;
+  transform: translateY(6px) scale(0.97); transition: all 0.2s cubic-bezier(0.16,1,0.3,1);
+  z-index: 30; box-shadow: var(--shadow-lg); overflow: hidden;
+}
+.cl-lang-menu.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+.cl-lang-menu button {
+  display: block; width: 100%; padding: 9px 14px; background: none; border: none;
+  color: var(--text); font-family: 'Ubuntu','El Messiri',sans-serif; font-size: 0.85rem;
+  cursor: pointer; text-align: right; transition: all var(--transition-fast, 0.15s);
+}
+.cl-lang-menu button:hover { background: var(--primary-light); color: var(--primary); }
+
 .cl-auth-area { flex: 1; min-width: 0; }
 
 .cl-btn {

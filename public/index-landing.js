@@ -19,6 +19,23 @@ const HOSTAKA_MAIN = 'https://hostaka.fun';
 
 function goToLogin(){ window.location = HOSTAKA_MAIN + '/login?next=' + encodeURIComponent(window.location.href); }
 
+// ===== اللغة =====
+function toggleLangMenu(){
+  document.getElementById('langMenu').classList.toggle('show');
+}
+document.addEventListener('click', function(e){
+  var wrap = document.getElementById('langToggle');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('langMenu')?.classList.remove('show');
+  }
+});
+function setLang(lang){
+  if (lang !== 'ar' && lang !== 'en') return;
+  localStorage.setItem('hostaka_lang', lang);
+  if (window.setHostakaLang) window.setHostakaLang(lang); // يحدّث كل عناصر data-i18n بالصفحة، بما فيها المحقونة ديناميكياً
+  document.getElementById('langMenu')?.classList.remove('show');
+}
+
 // ===== الثيم =====
 let currentTheme = localStorage.getItem('hostaka_theme') || 'light';
 function setTheme(theme){
@@ -61,11 +78,12 @@ async function initAuthArea(){
       <div class="cl-user-row">
         ${u.avatar ? `<img src="${esc(u.avatar)}" alt="" class="cl-user-avatar">` : `<span class="cl-user-avatar-fallback">${esc(u.username.charAt(0).toUpperCase())}</span>`}
         <span class="cl-user-meta"><span class="cl-user-name">@${esc(u.username)}</span></span>
-        <button class="cl-user-logout" onclick="doLogout()" title="تسجيل خروج">
+        <button class="cl-user-logout" onclick="doLogout()" data-i18n-title="console.logoutBtn" title="Log out">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </button>
       </div>
     `;
+    if (window.applyTranslations) window.applyTranslations(); // يترجم العنصر المحقون للتو (data-i18n-title)
   } catch (e) { /* تجاهل — يبقى زر تسجيل الدخول الافتراضي */ }
 }
 

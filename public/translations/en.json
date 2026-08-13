@@ -55,7 +55,8 @@
     "views7d": "Views (7 days)",
     "viewsToday": "Views Today",
     "visits14d": "Visits — Last 14 Days",
-    "welcome": "Welcome to Hostaka Admin"
+    "welcome": "Welcome to Hostaka Admin",
+    "pageTitle": "Your Console — console.hostaka.fun"
   },
   "chat": {
     "blockUser": "Block user",
@@ -243,5 +244,26 @@
   },
   "video": {
     "title": "Hostaka Video"
+  },
+  "console": {
+    "verifyingAccess": "Checking your access...",
+    "yourConsole": "Your console",
+    "loginFirst": "Log in with your main Hostaka account first",
+    "loginBtn": "Log In",
+    "logoutBtn": "Log Out",
+    "notAdminTitle": "Oops, you don't have admin access! 🙂",
+    "joinSteps": "You can join the project through the following steps",
+    "joinSuccessMsg": "Your request has been sent to the team — we'll review it and get back to you soon 🙂",
+    "fieldBirthdate": "Date of birth",
+    "fieldEmail": "Email",
+    "fieldFullName": "Full name",
+    "fieldReason": "Why you'd like to join",
+    "fieldContribution": "What you'd like to contribute",
+    "sendRequest": "Send request",
+    "fillAllFields": "Please fill in all fields",
+    "landingDesc": "The administrative and operational space for the Hostaka ecosystem — manage the platform, review contribution requests, and monitor the health of every affiliated service (the main platform, orbithub for chat and groups, aethercast for video and reels, and more to come). This space is for the team and moderators, and for any member who'd like to contribute to the platform and join the team.",
+    "navPlatform": "Platform",
+    "navWiki": "Wiki",
+    "navLaps": "Labs"
   }
 }

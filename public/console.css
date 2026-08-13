@@ -21,6 +21,26 @@ body.page-admin .nav-item.active {background:var(--primary-light);color:var(--pr
 body.page-admin .sidebar-footer {margin-top:auto;padding:12px;}
 body.page-admin .user-info {font-size:0.82rem;color:var(--muted);margin-bottom:8px;}
 body.page-admin .user-info span {color:var(--text);font-weight:700;}
+body.page-admin .lang-selector {
+  position:relative; display:flex; align-items:center; gap:8px;
+  padding:9px 10px; border-radius:var(--radius-sm); border:1px solid var(--border);
+  background:var(--card); color:var(--text); font-size:0.82rem; cursor:pointer;
+  margin-bottom:8px; transition:all var(--transition-fast);
+}
+body.page-admin .lang-selector:hover {background:var(--primary-light); border-color:var(--primary-border); color:var(--primary);}
+body.page-admin .lang-menu {
+  position:absolute; bottom:calc(100% + 6px); right:0; left:0;
+  background:var(--modal-bg); border:1px solid var(--border); border-radius:var(--radius-md);
+  padding:6px 0; opacity:0; visibility:hidden; transform:translateY(6px) scale(0.97);
+  transition:all 0.2s cubic-bezier(0.16,1,0.3,1); z-index:30; box-shadow:var(--shadow-lg); overflow:hidden;
+}
+body.page-admin .lang-menu.show {opacity:1; visibility:visible; transform:translateY(0) scale(1);}
+body.page-admin .lang-menu button {
+  display:block; width:100%; padding:9px 14px; background:none; border:none;
+  color:var(--text); font-family:'Ubuntu','El Messiri',sans-serif; font-size:0.85rem;
+  cursor:pointer; text-align:right; transition:all var(--transition-fast);
+}
+body.page-admin .lang-menu button:hover {background:var(--primary-light); color:var(--primary);}
 body.page-admin .btn-logout {width:100%;padding:9px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'Ubuntu','El Messiri';font-size:0.85rem;transition:all var(--transition-fast);}
 body.page-admin .btn-logout:hover {background:var(--primary-h);}
 body.page-admin .main {margin-right:220px;flex:1;padding:28px;}
