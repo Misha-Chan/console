@@ -379,9 +379,9 @@ async function loadAnalytics(){
     const series = d.dailySeries || [];
     const max = Math.max(1, ...series.map(s=>s.c));
     document.getElementById('analyticsChart').innerHTML = series.length ? series.map(s => `
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;" title="${esc(s.d)}: ${s.c} ${t('visitsWord')}">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;" title="${esc(s.d)}: ${s.c} ${t('visitsWord')}">
         <div style="width:100%;background:var(--primary);border-radius:4px 4px 0 0;height:${Math.max(4, Math.round((s.c/max)*100))}px;transition:height .3s;"></div>
-        <div style="font-size:0.62rem;color:var(--muted);white-space:nowrap;">${fmtShortDate(s.d)}</div>
+        <div style="font-size:0.62rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${fmtShortDate(s.d)}</div>
       </div>`).join('') : `<div style="color:var(--muted);font-size:0.82rem;">${t('noEnoughData')}</div>`;
 
     const tp = d.topPages || [];
