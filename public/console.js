@@ -677,7 +677,7 @@ async function replyReport(id, status){
 }
 
 // ============================================================
-// App Store review (apps.hostaka.fun submissions)
+// Hostaka Apps review (apps.hostaka.fun submissions)
 // ============================================================
 let appsFilter = 'pending';
 function APP_STATUS_LABELS(key){ return { pending:t('appStatusPending'), approved:t('appStatusApproved'), rejected:t('appStatusRejected') }[key]; }
