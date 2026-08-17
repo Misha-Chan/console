@@ -88,6 +88,11 @@
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <span data-i18n="admin.navPosts">Posts</span>
     </button>
+    <button class="nav-item" data-page="apps" onclick="showPage('apps')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+      <span data-i18n="admin.navApps">Apps</span>
+      <span id="appsBadge" style="background:var(--primary);color:#fff;font-size:0.65rem;padding:1px 6px;border-radius:var(--radius-full);margin-right:auto;display:none;"></span>
+    </button>
     <button class="nav-item" data-admin-only="1" data-page="verify" onclick="showPage('verify')">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
       <span data-i18n="admin.navVerify">Verification</span>
@@ -193,6 +198,18 @@
   <div class="page" id="page-posts">
     <div class="page-title" data-i18n="admin.postsTitle">Posts</div>
     <div class="card" id="postsList"><div style="text-align:center;color:var(--muted);padding:24px;" data-i18n="common.loading">Loading...</div></div>
+  </div>
+
+  <!-- Apps -->
+  <div class="page" id="page-apps">
+    <div class="page-title" data-i18n="admin.appsTitle">App Store Review</div>
+    <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;">
+      <button class="btn btn-dark btn-sm ap-tab active" data-status="pending" onclick="setAppsFilter('pending')" data-i18n="admin.reportsPending">Pending</button>
+      <button class="btn btn-ghost btn-sm ap-tab" data-status="approved" onclick="setAppsFilter('approved')" data-i18n="admin.appsApproved">Approved</button>
+      <button class="btn btn-ghost btn-sm ap-tab" data-status="rejected" onclick="setAppsFilter('rejected')" data-i18n="admin.appsRejected">Rejected</button>
+      <button class="btn btn-ghost btn-sm ap-tab" data-status="" onclick="setAppsFilter('')" data-i18n="admin.logsAll">All</button>
+    </div>
+    <div id="appsList"><div style="text-align:center;color:var(--muted);padding:24px;" data-i18n="common.loading">Loading...</div></div>
   </div>
 
   <!-- Verify -->

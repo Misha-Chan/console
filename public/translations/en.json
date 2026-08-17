@@ -56,7 +56,11 @@
     "viewsToday": "Views Today",
     "visits14d": "Visits — Last 14 Days",
     "welcome": "Welcome to Hostaka Admin",
-    "pageTitle": "Your Console — console.hostaka.fun"
+    "pageTitle": "Your Console — console.hostaka.fun",
+    "navApps": "Apps",
+    "appsTitle": "App Store Review",
+    "appsApproved": "Approved",
+    "appsRejected": "Rejected"
   },
   "chat": {
     "blockUser": "Block user",

@@ -51,7 +51,12 @@ const LANG = {
     reportStatusPending: 'قيد المراجعة', reportStatusResolved: 'تم الحل', reportStatusDismissed: 'مرفوض',
     reporterDefault: 'مستخدم', againstPrefix: '← بحق @', prevReply: 'ردك السابق',
     replyPlaceholder: 'اكتب رداً (اختياري)...', resolveReply: 'حل + رد', noReportsHere: 'لا توجد بلاغات هنا',
-    fetchReportsFail: 'فشل تحميل البلاغات', saved: 'تم الحفظ', saveFail: 'فشل الحفظ', visitsWord: 'زيارة'
+    fetchReportsFail: 'فشل تحميل البلاغات', saved: 'تم الحفظ', saveFail: 'فشل الحفظ', visitsWord: 'زيارة',
+    noAppsHere: 'لا توجد تطبيقات هنا', fetchAppsFail: 'فشل تحميل التطبيقات', appApproved: 'تمت الموافقة على التطبيق',
+    confirmRejectApp: 'رفض هذا التطبيق؟', appRejected: 'تم رفض التطبيق', appWarningPrompt: 'نص التحذير اللي يظهر بصفحة التطبيق (اتركه فارغاً لإزالة أي تحذير حالي):',
+    appWarned: 'تم حفظ التحذير', confirmDeleteApp: 'حذف هذا التطبيق نهائياً؟', appDownloads: 'تنزيل',
+    appRatingNone: 'لا تقييمات بعد', appWarnBtn: 'تحذير', appStatusPending: 'قيد المراجعة',
+    appStatusApproved: 'معتمد', appStatusRejected: 'مرفوض', viewApp: 'فتح'
   },
   en: {
     login: 'Log In', enter2faCode: 'Enter the two-factor code from your authenticator app:',
@@ -84,7 +89,12 @@ const LANG = {
     reportStatusPending: 'Pending', reportStatusResolved: 'Resolved', reportStatusDismissed: 'Dismissed',
     reporterDefault: 'User', againstPrefix: '← against @', prevReply: 'Your previous reply',
     replyPlaceholder: 'Write a reply (optional)...', resolveReply: 'Resolve + reply', noReportsHere: 'No reports here',
-    fetchReportsFail: 'Failed to load reports', saved: 'Saved', saveFail: 'Save failed', visitsWord: 'visits'
+    fetchReportsFail: 'Failed to load reports', saved: 'Saved', saveFail: 'Save failed', visitsWord: 'visits',
+    noAppsHere: 'No apps here', fetchAppsFail: 'Failed to load apps', appApproved: 'App approved',
+    confirmRejectApp: 'Reject this app?', appRejected: 'App rejected', appWarningPrompt: 'Warning text shown on the app page (leave empty to remove any current warning):',
+    appWarned: 'Warning saved', confirmDeleteApp: 'Permanently delete this app?', appDownloads: 'downloads',
+    appRatingNone: 'No ratings yet', appWarnBtn: 'Warn', appStatusPending: 'Pending',
+    appStatusApproved: 'Approved', appStatusRejected: 'Rejected', viewApp: 'Open'
   }
 };
 let currentLang = localStorage.getItem('hostaka_lang') || 'en';
@@ -129,6 +139,7 @@ function reRenderActivePage(){
   if (id === 'page-dashboard') loadDashboard();
   else if (id === 'page-users') loadUsers();
   else if (id === 'page-posts') loadPosts();
+  else if (id === 'page-apps') loadApps();
   else if (id === 'page-verify') loadVerify();
   else if (id === 'page-reports') loadReports();
   else if (id === 'page-logs') loadLogs();
@@ -280,6 +291,7 @@ function showPage(name){
   document.querySelector('.nav-item[data-page="'+name+'"]')?.classList.add('active');
   if(name==='users') loadUsers();
   if(name==='posts') loadPosts();
+  if(name==='apps') loadApps();
   if(name==='verify') loadVerify();
   if(name==='dashboard') loadDashboard();
   if(name==='reports') loadReports();
@@ -339,6 +351,12 @@ async function loadDashboard(){
     const rb = document.getElementById('reportsBadge');
     if(Array.isArray(pending) && pending.length){ rb.textContent=pending.length; rb.style.display='inline'; }
     else if(rb){ rb.style.display='none'; }
+  }catch(e){}
+  try{
+    const pendingApps = await api('/api/admin/apps');
+    const ab = document.getElementById('appsBadge');
+    const cnt = Array.isArray(pendingApps) ? pendingApps.filter(a=>a.status==='pending').length : 0;
+    if(ab){ if(cnt){ ab.textContent=cnt; ab.style.display='inline'; } else ab.style.display='none'; }
   }catch(e){}
   loadAnalytics();
   startActiveNowPolling();
@@ -658,6 +676,89 @@ async function replyReport(id, status){
   }catch(e){ toast(t('cantConnect')); }
 }
 
+// ============================================================
+// App Store review (apps.hostaka.fun submissions)
+// ============================================================
+let appsFilter = 'pending';
+function APP_STATUS_LABELS(key){ return { pending:t('appStatusPending'), approved:t('appStatusApproved'), rejected:t('appStatusRejected') }[key]; }
+
+function setAppsFilter(status){
+  appsFilter = status;
+  document.querySelectorAll('.ap-tab').forEach(b=>{
+    const active = b.dataset.status === status;
+    b.classList.toggle('btn-dark', active);
+    b.classList.toggle('btn-ghost', !active);
+  });
+  loadApps();
+}
+
+async function loadApps(){
+  const el = document.getElementById('appsList');
+  el.innerHTML = `<div style="text-align:center;color:var(--muted);padding:24px;">${t('loading')}</div>`;
+  try{
+    let apps = await api('/api/admin/apps');
+    if(!Array.isArray(apps)) apps = [];
+    if(appsFilter) apps = apps.filter(a => a.status === appsFilter);
+    if(!apps.length){
+      el.innerHTML = `<div style="text-align:center;color:var(--muted);padding:24px;">${t('noAppsHere')}</div>`;
+      return;
+    }
+    el.innerHTML = apps.map(a => {
+      const rating = a.avg_rating ? Number(a.avg_rating).toFixed(1) + ' ★ (' + (a.reviews_count||0) + ')' : t('appRatingNone');
+      return `
+      <div class="card" style="margin-bottom:12px;">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:48px;height:48px;border-radius:var(--radius-md);background:var(--dark);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+            ${a.icon ? `<img src="${esc(a.icon)}" style="width:100%;height:100%;object-fit:cover;">` : (a.name||'?').charAt(0).toUpperCase()}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+              <strong style="font-size:0.92rem;">${esc(a.name)}</strong>
+              <span class="badge badge-${a.status==='approved'?'active':(a.status==='pending'?'pending':'suspended')}">${esc(APP_STATUS_LABELS(a.status)||a.status)}</span>
+              ${a.category ? `<span class="badge badge-user">${esc(a.category)}</span>` : ''}
+            </div>
+            <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">${esc(a.publisher_name)} · ${fmtDate(a.created_at)} · ${a.downloads_count||0} ${t('appDownloads')} · ${rating}</div>
+            <div style="font-size:0.84rem;color:#444;line-height:1.6;margin-bottom:8px;">${esc((a.description||'').slice(0,160))}${(a.description||'').length>160?'...':''}</div>
+            ${a.warning ? `<div style="background:rgba(255,149,0,0.1);color:#a16207;border-radius:var(--radius-sm);padding:6px 10px;font-size:0.78rem;margin-bottom:8px;">⚠️ ${esc(a.warning)}</div>` : ''}
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <a class="btn btn-ghost btn-sm" href="${esc(a.download_url)}" target="_blank" rel="noopener">${t('viewApp')}</a>
+              ${a.status!=='approved' ? `<button class="btn btn-dark btn-sm" onclick="approveApp(${a.id})">${t('approve')}</button>` : ''}
+              ${a.status!=='rejected' ? `<button class="btn btn-ghost btn-sm" onclick="rejectApp(${a.id})">${t('reject')}</button>` : ''}
+              <button class="btn btn-ghost btn-sm" onclick="warnApp(${a.id})">${t('appWarnBtn')}</button>
+              ${MY_ROLE==='admin' ? `<button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="deleteAppEntry(${a.id})">${t('del')}</button>` : ''}
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){ el.innerHTML = `<div style="text-align:center;color:var(--muted);padding:24px;">${t('fetchAppsFail')}</div>`; }
+}
+
+async function approveApp(id){
+  const d = await api('/api/admin/apps/'+id, 'PUT', { action:'approve' });
+  if(d.success){ toast(t('appApproved')); loadApps(); loadDashboard(); }
+  else toast(d.error||t('execFail'));
+}
+async function rejectApp(id){
+  if(!await hostakaConfirm(t('confirmRejectApp'))) return;
+  const d = await api('/api/admin/apps/'+id, 'PUT', { action:'reject' });
+  if(d.success){ toast(t('appRejected')); loadApps(); loadDashboard(); }
+  else toast(d.error||t('execFail'));
+}
+async function warnApp(id){
+  const warning = await hostakaPrompt(t('appWarningPrompt'), '');
+  if(warning===null) return;
+  const d = await api('/api/admin/apps/'+id, 'PUT', { action:'warning', warning });
+  if(d.success){ toast(t('appWarned')); loadApps(); }
+  else toast(d.error||t('execFail'));
+}
+async function deleteAppEntry(id){
+  if(!await hostakaConfirm(t('confirmDeleteApp'))) return;
+  const d = await api('/api/admin/apps/'+id, 'DELETE');
+  if(d.success){ toast(t('deleted')); loadApps(); loadDashboard(); }
+  else toast(d.error||t('execFail'));
+}
+
 /* expose top-level functions for inline onclick handlers */
 try { window.setTheme = setTheme; } catch(e) {}
 try { window.toggleTheme = toggleTheme; } catch(e) {}
@@ -685,6 +786,12 @@ try { window.rejectVerify = rejectVerify; } catch(e) {}
 try { window.setReportsFilter = setReportsFilter; } catch(e) {}
 try { window.loadReports = loadReports; } catch(e) {}
 try { window.replyReport = replyReport; } catch(e) {}
+try { window.setAppsFilter = setAppsFilter; } catch(e) {}
+try { window.loadApps = loadApps; } catch(e) {}
+try { window.approveApp = approveApp; } catch(e) {}
+try { window.rejectApp = rejectApp; } catch(e) {}
+try { window.warnApp = warnApp; } catch(e) {}
+try { window.deleteAppEntry = deleteAppEntry; } catch(e) {}
 try { window.loadAnalytics = loadAnalytics; } catch(e) {}
 try { window.setLogsFilter = setLogsFilter; } catch(e) {}
 try { window.loadLogs = loadLogs; } catch(e) {}

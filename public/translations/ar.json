@@ -56,7 +56,11 @@
     "viewsToday": "زيارات اليوم",
     "visits14d": "الزيارات — آخر 14 يوم",
     "welcome": "مرحباً بك في Hostaka Admin",
-    "pageTitle": "لوحتك — console.hostaka.fun"
+    "pageTitle": "لوحتك — console.hostaka.fun",
+    "navApps": "التطبيقات",
+    "appsTitle": "مراجعة متجر التطبيقات",
+    "appsApproved": "معتمد",
+    "appsRejected": "مرفوض"
   },
   "chat": {
     "blockUser": "حظر المستخدم",
