@@ -60,7 +60,11 @@
     "navApps": "Apps",
     "appsTitle": "Hostaka Apps Review",
     "appsApproved": "Approved",
-    "appsRejected": "Rejected"
+    "appsRejected": "Rejected",
+    "navWiki": "Wiki",
+    "wikiTitle": "Hostaka Wiki Review",
+    "wikiSearchPlaceholder": "Search by extension, title, content, or username...",
+    "wikiSearchBtn": "Search"
   },
   "chat": {
     "blockUser": "Block user",

@@ -93,6 +93,10 @@
       <span data-i18n="admin.navApps">Apps</span>
       <span id="appsBadge" style="background:var(--primary);color:#fff;font-size:0.65rem;padding:1px 6px;border-radius:var(--radius-full);margin-right:auto;display:none;"></span>
     </button>
+    <button class="nav-item" data-page="wiki" onclick="showPage('wiki')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span data-i18n="admin.navWiki">Wiki</span>
+    </button>
     <button class="nav-item" data-admin-only="1" data-page="verify" onclick="showPage('verify')">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
       <span data-i18n="admin.navVerify">Verification</span>
@@ -210,6 +214,16 @@
       <button class="btn btn-ghost btn-sm ap-tab" data-status="" onclick="setAppsFilter('')" data-i18n="admin.logsAll">All</button>
     </div>
     <div id="appsList"><div style="text-align:center;color:var(--muted);padding:24px;" data-i18n="common.loading">Loading...</div></div>
+  </div>
+
+  <!-- Wiki -->
+  <div class="page" id="page-wiki">
+    <div class="page-title" data-i18n="admin.wikiTitle">Hostaka Wiki Review</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <input type="text" id="wikiSearchInput" class="form-input" data-i18n-placeholder="admin.wikiSearchPlaceholder" placeholder="Search by extension, title, content, or username..." style="flex:1;margin-bottom:0;" onkeydown="if(event.key==='Enter')loadWikiPosts()">
+      <button class="btn btn-dark btn-sm" onclick="loadWikiPosts()" data-i18n="admin.wikiSearchBtn">Search</button>
+    </div>
+    <div id="wikiList"><div style="text-align:center;color:var(--muted);padding:24px;" data-i18n="common.loading">Loading...</div></div>
   </div>
 
   <!-- Verify -->

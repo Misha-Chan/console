@@ -60,7 +60,11 @@
     "navApps": "التطبيقات",
     "appsTitle": "مراجعة تطبيقات هوستاكا",
     "appsApproved": "معتمد",
-    "appsRejected": "مرفوض"
+    "appsRejected": "مرفوض",
+    "navWiki": "الويكي",
+    "wikiTitle": "مراجعة ويكي هوستاكا",
+    "wikiSearchPlaceholder": "ابحث بالامتداد، العنوان، المحتوى، أو اسم المستخدم...",
+    "wikiSearchBtn": "بحث"
   },
   "chat": {
     "blockUser": "حظر المستخدم",

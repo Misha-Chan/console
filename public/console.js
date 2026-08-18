@@ -56,7 +56,10 @@ const LANG = {
     confirmRejectApp: 'رفض هذا التطبيق؟', appRejected: 'تم رفض التطبيق', appWarningPrompt: 'نص التحذير اللي يظهر بصفحة التطبيق (اتركه فارغاً لإزالة أي تحذير حالي):',
     appWarned: 'تم حفظ التحذير', confirmDeleteApp: 'حذف هذا التطبيق نهائياً؟', appDownloads: 'تنزيل',
     appRatingNone: 'لا تقييمات بعد', appWarnBtn: 'تحذير', appStatusPending: 'قيد المراجعة',
-    appStatusApproved: 'معتمد', appStatusRejected: 'مرفوض', viewApp: 'فتح'
+    appStatusApproved: 'معتمد', appStatusRejected: 'مرفوض', viewApp: 'فتح',
+    noWikiPosts: 'لا توجد منشورات', fetchWikiFail: 'فشل تحميل منشورات الويكي',
+    wikiReplyTo: 'رد على', confirmDeleteWikiPost: 'حذف هذا المنشور نهائياً؟ (سيُحذف أي ردود عليه أيضاً)',
+    wikiCommentsCount: 'رد'
   },
   en: {
     login: 'Log In', enter2faCode: 'Enter the two-factor code from your authenticator app:',
@@ -94,7 +97,10 @@ const LANG = {
     confirmRejectApp: 'Reject this app?', appRejected: 'App rejected', appWarningPrompt: 'Warning text shown on the app page (leave empty to remove any current warning):',
     appWarned: 'Warning saved', confirmDeleteApp: 'Permanently delete this app?', appDownloads: 'downloads',
     appRatingNone: 'No ratings yet', appWarnBtn: 'Warn', appStatusPending: 'Pending',
-    appStatusApproved: 'Approved', appStatusRejected: 'Rejected', viewApp: 'Open'
+    appStatusApproved: 'Approved', appStatusRejected: 'Rejected', viewApp: 'Open',
+    noWikiPosts: 'No posts found', fetchWikiFail: 'Failed to load wiki posts',
+    wikiReplyTo: 'Reply to', confirmDeleteWikiPost: 'Permanently delete this post? (Any replies to it will be deleted too)',
+    wikiCommentsCount: 'replies'
   }
 };
 let currentLang = localStorage.getItem('hostaka_lang') || 'en';
@@ -140,6 +146,7 @@ function reRenderActivePage(){
   else if (id === 'page-users') loadUsers();
   else if (id === 'page-posts') loadPosts();
   else if (id === 'page-apps') loadApps();
+  else if (id === 'page-wiki') loadWikiPosts();
   else if (id === 'page-verify') loadVerify();
   else if (id === 'page-reports') loadReports();
   else if (id === 'page-logs') loadLogs();
@@ -292,6 +299,7 @@ function showPage(name){
   if(name==='users') loadUsers();
   if(name==='posts') loadPosts();
   if(name==='apps') loadApps();
+  if(name==='wiki') loadWikiPosts();
   if(name==='verify') loadVerify();
   if(name==='dashboard') loadDashboard();
   if(name==='reports') loadReports();
@@ -759,6 +767,51 @@ async function deleteAppEntry(id){
   else toast(d.error||t('execFail'));
 }
 
+// ============================================================
+// Wiki review (wiki.hostaka.fun posts + replies — منشورات تُنشر فوراً،
+// فمافيه موافقة/رفض هنا، بس بحث + حذف)
+// ============================================================
+async function loadWikiPosts(){
+  const el = document.getElementById('wikiList');
+  el.innerHTML = `<div style="text-align:center;color:var(--muted);padding:24px;">${t('loading')}</div>`;
+  try{
+    const search = (document.getElementById('wikiSearchInput')?.value || '').trim();
+    const posts = await api('/api/admin/wiki-posts' + (search ? '?q=' + encodeURIComponent(search) : ''));
+    if(!Array.isArray(posts) || !posts.length){
+      el.innerHTML = `<div style="text-align:center;color:var(--muted);padding:24px;">${t('noWikiPosts')}</div>`;
+      return;
+    }
+    el.innerHTML = posts.map(p => {
+      const heading = p.is_comment
+        ? `${t('wikiReplyTo')} @${esc(p.mentioned_username||'')}`
+        : esc(p.title);
+      return `
+      <div class="card" style="margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+          <span class="badge badge-user">${esc(p.extension)}</span>
+          <strong style="font-size:0.9rem;">${heading}</strong>
+          ${p.author.is_admin ? `<span class="badge badge-admin">admin</span>` : ''}
+          ${p.comments_count ? `<span class="badge badge-user">${p.comments_count} ${t('wikiCommentsCount')}</span>` : ''}
+        </div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:8px;">@${esc(p.author.username)} · ${fmtDate(p.created_at)}</div>
+        <div style="font-size:0.84rem;color:#444;line-height:1.6;margin-bottom:10px;">${esc((p.body||'').slice(0,200))}${(p.body||'').length>200?'...':''}</div>
+        ${p.image ? `<img src="${esc(p.image)}" style="max-width:160px;border-radius:var(--radius-sm);margin-bottom:10px;display:block;">` : ''}
+        <div style="display:flex;gap:8px;">
+          <a class="btn btn-ghost btn-sm" href="https://wiki.hostaka.fun/${encodeURIComponent(p.extension)}/${encodeURIComponent(p.token)}" target="_blank" rel="noopener">${t('viewApp')}</a>
+          ${MY_ROLE==='admin' ? `<button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="deleteWikiPostAdmin(${p.id})">${t('del')}</button>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){ el.innerHTML = `<div style="text-align:center;color:var(--muted);padding:24px;">${t('fetchWikiFail')}</div>`; }
+}
+
+async function deleteWikiPostAdmin(id){
+  if(!await hostakaConfirm(t('confirmDeleteWikiPost'))) return;
+  const d = await api('/api/admin/wiki-posts/'+id, 'DELETE');
+  if(d.success){ toast(t('deleted')); loadWikiPosts(); }
+  else toast(d.error||t('execFail'));
+}
+
 /* expose top-level functions for inline onclick handlers */
 try { window.setTheme = setTheme; } catch(e) {}
 try { window.toggleTheme = toggleTheme; } catch(e) {}
@@ -792,6 +845,8 @@ try { window.approveApp = approveApp; } catch(e) {}
 try { window.rejectApp = rejectApp; } catch(e) {}
 try { window.warnApp = warnApp; } catch(e) {}
 try { window.deleteAppEntry = deleteAppEntry; } catch(e) {}
+try { window.loadWikiPosts = loadWikiPosts; } catch(e) {}
+try { window.deleteWikiPostAdmin = deleteWikiPostAdmin; } catch(e) {}
 try { window.loadAnalytics = loadAnalytics; } catch(e) {}
 try { window.setLogsFilter = setLogsFilter; } catch(e) {}
 try { window.loadLogs = loadLogs; } catch(e) {}
