@@ -63,7 +63,25 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.ht
 app.get('/user/console', (req, res) => sendPrivate(res, 'console.html')); // لوحة خاصة، بدون فهرسة
 
 app.get('/robots.txt', (req, res) => {
-  res.type('text/plain').send('User-agent: *\nAllow: /\nDisallow: /user/\n');
+  const origin = `https://${req.get('host')}`;
+  res.type('text/plain').send(`User-agent: *\nAllow: /\nDisallow: /user/\n\nSitemap: ${origin}/sitemap.xml\n`);
+});
+
+// ============================================================
+// sitemap.xml — Console (console.hostaka.fun), part of the Hostaka
+// Ecosystem. Announcement page for new updates from the admin team,
+// and admin tools for moderators. The admin panel itself (/user/console)
+// is private and excluded via robots.txt above, so the sitemap only
+// lists the public announcements homepage — same pattern used by
+// hostaka.fun/sitemap.xml.
+// ============================================================
+app.get('/sitemap.xml', (req, res) => {
+  const origin = `https://${req.get('host')}`;
+  res.type('application/xml').send(
+`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>${origin}/</loc><priority>1.0</priority></url>
+</urlset>`);
 });
 
 // أي مسار غير معروف يرجع للصفحة الرئيسية التعريفية

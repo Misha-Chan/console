@@ -598,7 +598,7 @@ async function loadVerify(){
     el.innerHTML=reqs.map(r=>`
       <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);">
         <div style="width:38px;height:38px;border-radius:var(--radius-full);background:var(--avatar-gradient, var(--primary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;flex-shrink:0;overflow:hidden;">
-          ${r.avatar?`<img src="${esc(r.avatar)}" style="width:100%;height:100%;object-fit:cover;">`:(r.display_name||r.username||'?').charAt(0).toUpperCase()}
+          ${r.avatar?`<img src="${esc(r.avatar)}" style="width:100%;height:100%;object-fit:cover;">`:`<img src="/default-avatar.jpg" style="width:100%;height:100%;object-fit:cover;">`}
         </div>
         <div style="flex:1;">
           <strong>${esc(r.display_name||r.username)}</strong>

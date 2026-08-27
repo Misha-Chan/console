@@ -76,7 +76,7 @@ async function initAuthArea(){
 
     area.innerHTML = `
       <div class="cl-user-row">
-        ${u.avatar ? `<img src="${esc(u.avatar)}" alt="" class="cl-user-avatar">` : `<span class="cl-user-avatar-fallback">${esc(u.username.charAt(0).toUpperCase())}</span>`}
+        ${u.avatar ? `<img src="${esc(u.avatar)}" alt="" class="cl-user-avatar">` : `<img src="/default-avatar.jpg" alt="" class="cl-user-avatar">`}
         <span class="cl-user-meta"><span class="cl-user-name">@${esc(u.username)}</span></span>
         <button class="cl-user-logout" onclick="doLogout()" data-i18n-title="console.logoutBtn" title="Log out">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
