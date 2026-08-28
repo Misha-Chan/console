@@ -178,7 +178,7 @@ async function api(url,method='GET',body=null){
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function toUTCDate(s){if(!s)return new Date(NaN);if(s instanceof Date)return s;if(typeof s==='string'&&!/[zZ]|[+-]\d\d:?\d\d$/.test(s))return new Date(s.replace(' ','T')+'Z');return new Date(s);}
-function fmtDate(s){if(!s)return'';return toUTCDate(s).toLocaleDateString('ar-SA',{year:'numeric',month:'short',day:'numeric'});}
+function fmtDate(s){if(!s)return'';return toUTCDate(s).toLocaleDateString(currentLang==='ar'?'ar-SA':'en-US',{year:'numeric',month:'short',day:'numeric'});}
 
 // Login
 function showGate(state){
@@ -388,7 +388,7 @@ function startActiveNowPolling(){
 }
 
 function fmtShortDate(d){
-  try{ return toUTCDate(d).toLocaleDateString('ar-SA',{month:'short',day:'numeric'}); }catch(e){ return d; }
+  try{ return toUTCDate(d).toLocaleDateString(currentLang==='ar'?'ar-SA':'en-US',{month:'short',day:'numeric'}); }catch(e){ return d; }
 }
 
 async function loadAnalytics(){
@@ -458,7 +458,7 @@ async function loadLogs(){
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap;">
           <span style="color:${LOG_LEVEL_COLORS[l.level]||'var(--muted)'};font-weight:800;text-transform:uppercase;">${esc(l.level)}</span>
           ${l.status_code ? `<span style="color:var(--muted);">${esc(l.method||'')} ${esc(l.path||'')} → ${l.status_code}</span>` : ''}
-          <span style="color:var(--muted);margin-right:auto;font-family:'Ubuntu','El Messiri';">${fmtDate(l.created_at)} ${toUTCDate(l.created_at).toLocaleTimeString('ar-SA')}</span>
+          <span style="color:var(--muted);margin-right:auto;font-family:'Ubuntu','El Messiri';">${fmtDate(l.created_at)} ${toUTCDate(l.created_at).toLocaleTimeString(currentLang==='ar'?'ar-SA':'en-US')}</span>
         </div>
         <div style="white-space:pre-wrap;word-break:break-all;color:var(--text);line-height:1.6;">${esc(l.message)}</div>
       </div>`).join('') + `</div>`;
