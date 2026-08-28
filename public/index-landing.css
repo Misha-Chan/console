@@ -123,13 +123,35 @@ body.page-console-landing {
 /* ===== المحتوى الرئيسي ===== */
 .cl-main {
   flex: 1; min-width: 0;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; justify-content: center;
   padding: 40px 24px;
 }
-.cl-hero { max-width: 560px; text-align: center; }
+.cl-content { max-width: 640px; width: 100%; }
+.cl-hero { max-width: 560px; text-align: center; margin: 0 auto; }
 .cl-hero-icon { width: 56px; height: 56px; border-radius: 14px; margin-bottom: 18px; }
 .cl-hero h1 { font-size: 1.4rem; font-weight: 800; margin: 0 0 14px; }
 .cl-hero-desc { color: var(--muted); line-height: 1.9; font-size: 0.92rem; margin: 0; }
+
+/* ===== الأخبار والتحديثات ===== */
+.cl-news { margin-top: 48px; }
+.cl-news-title { font-size: 1.05rem; font-weight: 800; margin: 0 0 16px; }
+.cl-news-loading, .cl-news-empty {
+  color: var(--muted); font-size: 0.86rem; text-align: center; padding: 24px 0;
+}
+.cl-news-feed { display: flex; flex-direction: column; gap: 14px; }
+.cl-news-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 18px; display: flex; gap: 14px; align-items: flex-start;
+}
+.cl-news-card-img { width: 96px; height: 96px; object-fit: cover; border-radius: var(--radius-sm); flex-shrink: 0; }
+.cl-news-card-body { flex: 1; min-width: 0; }
+.cl-news-card-title { font-weight: 800; font-size: 0.94rem; margin: 0 0 4px; }
+.cl-news-card-meta { color: var(--muted); font-size: 0.76rem; margin-bottom: 8px; }
+.cl-news-card-text { font-size: 0.86rem; line-height: 1.7; white-space: pre-wrap; color: var(--text); }
+@media (max-width: 480px) {
+  .cl-news-card { flex-direction: column; }
+  .cl-news-card-img { width: 100%; height: 160px; }
+}
 
 /* ===== موبايل: الشريط الجانبي يصير شريط أفقي أعلى الصفحة ===== */
 @media (max-width: 760px) {

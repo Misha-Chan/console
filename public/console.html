@@ -98,6 +98,10 @@
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       <span data-i18n="admin.navWiki">Wiki</span>
     </button>
+    <button class="nav-item" data-admin-only="1" data-page="news" onclick="showPage('news')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
+      <span data-i18n="admin.navNews">News & Updates</span>
+    </button>
     <button class="nav-item" data-admin-only="1" data-page="verify" onclick="showPage('verify')">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
       <span data-i18n="admin.navVerify">Verification</span>
@@ -225,6 +229,36 @@
       <button class="btn btn-dark btn-sm" onclick="loadWikiPosts()" data-i18n="admin.wikiSearchBtn">Search</button>
     </div>
     <div id="wikiList"><div style="text-align:center;color:var(--muted);padding:24px;" data-i18n="common.loading">Loading...</div></div>
+  </div>
+
+  <!-- News & Updates -->
+  <div class="page" id="page-news">
+    <div class="page-title" data-i18n="admin.newsTitle">News & Updates</div>
+
+    <div class="card news-composer">
+      <label class="form-label" data-i18n="admin.newsFieldTitle">Title</label>
+      <input type="text" class="form-input" id="newsTitleInput" maxlength="150" data-i18n-placeholder="admin.newsTitlePlaceholder" placeholder="e.g. New feature just shipped!">
+
+      <label class="form-label" data-i18n="admin.newsFieldBody">Content</label>
+      <textarea class="form-input" id="newsBodyInput" rows="5" maxlength="5000" style="resize:vertical;" data-i18n-placeholder="admin.newsBodyPlaceholder" placeholder="Write the announcement details..."></textarea>
+
+      <input type="file" id="newsImageFile" accept="image/*" style="display:none;" onchange="onNewsImage(event)">
+      <div id="newsImagePreviewWrap" style="display:none;margin-bottom:12px;position:relative;">
+        <img id="newsImagePreview" src="" alt="" style="max-width:220px;border-radius:var(--radius-sm);display:block;">
+        <button type="button" class="btn btn-ghost btn-sm" style="margin-top:8px;color:var(--danger);" onclick="removeNewsImage()" data-i18n="admin.newsRemoveImage">Remove image</button>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px;">
+        <button type="button" class="btn btn-ghost" onclick="document.getElementById('newsImageFile').click()" data-i18n="admin.newsAttachImage">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span data-i18n="admin.newsAttachImage">Attach image</span>
+        </button>
+        <button type="button" class="btn btn-dark" id="newsPublishBtn" onclick="publishNews()" data-i18n="admin.newsPublishBtn">Publish</button>
+      </div>
+    </div>
+
+    <div class="page-title" style="font-size:1rem;margin-top:26px;" data-i18n="admin.newsPublishedTitle">Published</div>
+    <div id="newsList"><div style="text-align:center;color:var(--muted);padding:24px;" data-i18n="common.loading">Loading...</div></div>
   </div>
 
   <!-- Verify -->

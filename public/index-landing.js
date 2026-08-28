@@ -93,3 +93,37 @@ function doLogout(){
 }
 
 initAuthArea();
+
+// ===== الأخبار والتحديثات — تُعرض بشكل طبيعي بالصفحة الرئيسية =====
+function fmtNewsDate(s){
+  if(!s) return '';
+  const d = /[zZ]|[+-]\d\d:?\d\d$/.test(s) ? new Date(s) : new Date(s.replace(' ','T')+'Z');
+  const lang = (window.currentLang === 'ar') ? 'ar-SA' : 'en-US';
+  return d.toLocaleDateString(lang, { year:'numeric', month:'short', day:'numeric' });
+}
+
+async function loadPublicNews(){
+  const feed = document.getElementById('newsFeed');
+  if(!feed) return;
+  try {
+    const r = await fetch('/api/news');
+    const list = await r.json();
+    if(!Array.isArray(list) || !list.length){
+      feed.innerHTML = `<div class="cl-news-empty">${window.t ? window.t('console.newsEmptyState','No updates yet — check back soon.') : 'No updates yet — check back soon.'}</div>`;
+      return;
+    }
+    feed.innerHTML = list.map(n => `
+      <article class="cl-news-card">
+        ${n.image ? `<img src="${esc(n.image)}" alt="" class="cl-news-card-img">` : ''}
+        <div class="cl-news-card-body">
+          <h3 class="cl-news-card-title">${esc(n.title)}</h3>
+          <div class="cl-news-card-meta">${esc(n.author?.display_name || '')} · ${fmtNewsDate(n.created_at)}</div>
+          <div class="cl-news-card-text">${esc(n.body)}</div>
+        </div>
+      </article>`).join('');
+  } catch(e) {
+    feed.innerHTML = `<div class="cl-news-empty">${window.t ? window.t('console.newsEmptyState','No updates yet — check back soon.') : 'No updates yet — check back soon.'}</div>`;
+  }
+}
+loadPublicNews();
+document.addEventListener('hostaka:langchange', loadPublicNews); // يعيد رسم التواريخ/النص الفارغ بلغة صحيحة عند تبديل اللغة

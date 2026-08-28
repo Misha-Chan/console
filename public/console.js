@@ -59,7 +59,11 @@ const LANG = {
     appStatusApproved: 'معتمد', appStatusRejected: 'مرفوض', viewApp: 'فتح',
     noWikiPosts: 'لا توجد منشورات', fetchWikiFail: 'فشل تحميل منشورات الويكي',
     wikiReplyTo: 'رد على', confirmDeleteWikiPost: 'حذف هذا المنشور نهائياً؟ (سيُحذف أي ردود عليه أيضاً)',
-    wikiCommentsCount: 'رد'
+    wikiCommentsCount: 'رد',
+    newsFillFields: 'الرجاء تعبئة العنوان والمحتوى', newsPublishing: 'جارٍ النشر...',
+    newsPublished: 'تم نشر الخبر', newsPublishFail: 'فشل النشر', newsUploadFail: 'فشل رفع الصورة',
+    invalidImageFile: 'الرجاء اختيار ملف صورة صالح', noNewsYet: 'لا توجد أخبار بعد',
+    fetchNewsFail: 'فشل تحميل الأخبار', confirmDeleteNews: 'حذف هذا الخبر نهائياً؟'
   },
   en: {
     login: 'Log In', enter2faCode: 'Enter the two-factor code from your authenticator app:',
@@ -100,7 +104,11 @@ const LANG = {
     appStatusApproved: 'Approved', appStatusRejected: 'Rejected', viewApp: 'Open',
     noWikiPosts: 'No posts found', fetchWikiFail: 'Failed to load wiki posts',
     wikiReplyTo: 'Reply to', confirmDeleteWikiPost: 'Permanently delete this post? (Any replies to it will be deleted too)',
-    wikiCommentsCount: 'replies'
+    wikiCommentsCount: 'replies',
+    newsFillFields: 'Please fill in the title and content', newsPublishing: 'Publishing...',
+    newsPublished: 'News published', newsPublishFail: 'Failed to publish', newsUploadFail: 'Failed to upload image',
+    invalidImageFile: 'Please select a valid image file', noNewsYet: 'No news yet',
+    fetchNewsFail: 'Failed to load news', confirmDeleteNews: 'Permanently delete this news post?'
   }
 };
 let currentLang = localStorage.getItem('hostaka_lang') || 'en';
@@ -147,6 +155,7 @@ function reRenderActivePage(){
   else if (id === 'page-posts') loadPosts();
   else if (id === 'page-apps') loadApps();
   else if (id === 'page-wiki') loadWikiPosts();
+  else if (id === 'page-news') loadNews();
   else if (id === 'page-verify') loadVerify();
   else if (id === 'page-reports') loadReports();
   else if (id === 'page-logs') loadLogs();
@@ -300,6 +309,7 @@ function showPage(name){
   if(name==='posts') loadPosts();
   if(name==='apps') loadApps();
   if(name==='wiki') loadWikiPosts();
+  if(name==='news') loadNews();
   if(name==='verify') loadVerify();
   if(name==='dashboard') loadDashboard();
   if(name==='reports') loadReports();
@@ -812,6 +822,93 @@ async function deleteWikiPostAdmin(id){
   else toast(d.error||t('execFail'));
 }
 
+// ============================================================
+// News & Updates — نشر أخبار/تحديثات رسمية من لوحة الإدارة، تظهر
+// بشكل طبيعي بالصفحة الرئيسية التعريفية لـ console.hostaka.fun
+// ============================================================
+let newsImageBase64 = '';
+
+function onNewsImage(e){
+  const f = e.target.files[0];
+  if(!f) return;
+  if(!f.type.startsWith('image/')){ toast(t('invalidImageFile')); e.target.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    newsImageBase64 = ev.target.result;
+    document.getElementById('newsImagePreview').src = newsImageBase64;
+    document.getElementById('newsImagePreviewWrap').style.display = 'block';
+  };
+  reader.readAsDataURL(f);
+  e.target.value = '';
+}
+
+function removeNewsImage(){
+  newsImageBase64 = '';
+  document.getElementById('newsImagePreview').src = '';
+  document.getElementById('newsImagePreviewWrap').style.display = 'none';
+  document.getElementById('newsImageFile').value = '';
+}
+
+async function publishNews(){
+  const titleEl = document.getElementById('newsTitleInput');
+  const bodyEl = document.getElementById('newsBodyInput');
+  const title = titleEl.value.trim();
+  const body = bodyEl.value.trim();
+  if(!title || !body){ toast(t('newsFillFields')); return; }
+
+  const btn = document.getElementById('newsPublishBtn');
+  btn.disabled = true; btn.textContent = t('newsPublishing');
+  try{
+    let imageUrl = '';
+    if(newsImageBase64){
+      const up = await api('/api/upload', 'POST', { image: newsImageBase64 });
+      if(!up.url){ toast(up.error || t('newsUploadFail')); btn.disabled=false; btn.textContent=t('newsPublishBtn'); return; }
+      imageUrl = up.url;
+    }
+    const d = await api('/api/admin/news', 'POST', { title, body, image: imageUrl });
+    if(d.success){
+      toast(t('newsPublished'));
+      titleEl.value = ''; bodyEl.value = '';
+      removeNewsImage();
+      loadNews();
+    } else {
+      toast(d.error || t('newsPublishFail'));
+    }
+  }catch(e){ toast(t('newsPublishFail')); }
+  btn.disabled = false; btn.textContent = t('newsPublishBtn');
+}
+
+async function loadNews(){
+  const el = document.getElementById('newsList');
+  el.innerHTML = `<div style="text-align:center;color:var(--muted);padding:24px;">${t('loading')}</div>`;
+  try{
+    const list = await api('/api/news');
+    if(!Array.isArray(list) || !list.length){
+      el.innerHTML = `<div style="text-align:center;color:var(--muted);padding:24px;">${t('noNewsYet')}</div>`;
+      return;
+    }
+    el.innerHTML = list.map(n => `
+      <div class="card news-card" style="margin-bottom:12px;">
+        ${n.image ? `<img src="${esc(n.image)}" class="news-card-img" alt="">` : ''}
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:800;font-size:0.92rem;margin-bottom:4px;">${esc(n.title)}</div>
+          <div style="font-size:0.78rem;color:var(--muted);margin-bottom:8px;">${esc(n.author.display_name)} · ${fmtDate(n.created_at)}</div>
+          <div style="font-size:0.84rem;color:#444;line-height:1.6;white-space:pre-wrap;">${esc(n.body)}</div>
+          <div style="margin-top:10px;">
+            <button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="deleteNewsAdmin(${n.id})">${t('del')}</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }catch(e){ el.innerHTML = `<div style="text-align:center;color:var(--muted);padding:24px;">${t('fetchNewsFail')}</div>`; }
+}
+
+async function deleteNewsAdmin(id){
+  if(!await hostakaConfirm(t('confirmDeleteNews'))) return;
+  const d = await api('/api/admin/news/'+id, 'DELETE');
+  if(d.success){ toast(t('deleted')); loadNews(); }
+  else toast(d.error||t('execFail'));
+}
+
 /* expose top-level functions for inline onclick handlers */
 try { window.setTheme = setTheme; } catch(e) {}
 try { window.toggleTheme = toggleTheme; } catch(e) {}
@@ -847,6 +944,11 @@ try { window.warnApp = warnApp; } catch(e) {}
 try { window.deleteAppEntry = deleteAppEntry; } catch(e) {}
 try { window.loadWikiPosts = loadWikiPosts; } catch(e) {}
 try { window.deleteWikiPostAdmin = deleteWikiPostAdmin; } catch(e) {}
+try { window.onNewsImage = onNewsImage; } catch(e) {}
+try { window.removeNewsImage = removeNewsImage; } catch(e) {}
+try { window.publishNews = publishNews; } catch(e) {}
+try { window.loadNews = loadNews; } catch(e) {}
+try { window.deleteNewsAdmin = deleteNewsAdmin; } catch(e) {}
 try { window.loadAnalytics = loadAnalytics; } catch(e) {}
 try { window.setLogsFilter = setLogsFilter; } catch(e) {}
 try { window.loadLogs = loadLogs; } catch(e) {}
