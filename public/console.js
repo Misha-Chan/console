@@ -185,7 +185,8 @@ async function api(url,method='GET',body=null){
   const r=await fetch(url,opts); return r.json();
 }
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function escJs(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\r?\n/g,'\\n');}
 function toUTCDate(s){if(!s)return new Date(NaN);if(s instanceof Date)return s;if(typeof s==='string'&&!/[zZ]|[+-]\d\d:?\d\d$/.test(s))return new Date(s.replace(' ','T')+'Z');return new Date(s);}
 function fmtDate(s){if(!s)return'';return toUTCDate(s).toLocaleDateString(currentLang==='ar'?'ar-SA':'en-US',{year:'numeric',month:'short',day:'numeric'});}
 
@@ -506,10 +507,10 @@ async function loadUsers(){
             ${MY_ROLE==='admin' && u.role==='user'?`<button class="btn btn-dark btn-sm" onclick="promoteToModerator(${u.id})">${t('promoteToModerator')}</button>`:''}
             ${MY_ROLE==='admin' && u.role!=='admin'?`<button class="btn btn-dark btn-sm" onclick="promoteToAdmin(${u.id})">${t('promoteToAdmin')}</button>`:''}
             ${MY_ROLE==='admin' && u.role==='moderator'?`<button class="btn btn-ghost btn-sm" onclick="demoteUser(${u.id})">${t('demote')}</button>`:''}
-            ${u.role!=='admin' && !u.suspended?`<button class="btn btn-ghost btn-sm" onclick="suspendUser(${u.id},'${esc(u.username)}')" style="color:var(--danger);">${t('suspend')}</button>`:''}
-            ${u.role!=='admin' && u.suspended?`<button class="btn btn-ghost btn-sm" onclick="unsuspendUser(${u.id},'${esc(u.username)}')" style="color:#15803d;">${t('unsuspend')}</button>`:''}
-            ${MY_ROLE==='admin' && Number(u.totp_enabled)===1?`<button class="btn btn-ghost btn-sm" onclick="adminDisable2FA(${u.id},'${esc(u.username)}')" style="color:#a16207;" title="${t('disable2FATitle')}">${t('disable2FABtn')}</button>`:''}
-            ${MY_ROLE==='admin' && u.role!=='admin'?`<button class="btn btn-ghost btn-sm" onclick="deleteUser(${u.id},'${esc(u.username)}')">${t('del')}</button>`:''}
+            ${u.role!=='admin' && !u.suspended?`<button class="btn btn-ghost btn-sm" onclick="suspendUser(${u.id},'${escJs(u.username)}')" style="color:var(--danger);">${t('suspend')}</button>`:''}
+            ${u.role!=='admin' && u.suspended?`<button class="btn btn-ghost btn-sm" onclick="unsuspendUser(${u.id},'${escJs(u.username)}')" style="color:#15803d;">${t('unsuspend')}</button>`:''}
+            ${MY_ROLE==='admin' && Number(u.totp_enabled)===1?`<button class="btn btn-ghost btn-sm" onclick="adminDisable2FA(${u.id},'${escJs(u.username)}')" style="color:#a16207;" title="${t('disable2FATitle')}">${t('disable2FABtn')}</button>`:''}
+            ${MY_ROLE==='admin' && u.role!=='admin'?`<button class="btn btn-ghost btn-sm" onclick="deleteUser(${u.id},'${escJs(u.username)}')">${t('del')}</button>`:''}
           </div>
         </td>
       </tr>`).join('');
@@ -568,7 +569,7 @@ async function loadPosts(){
             ${Number(p.suspended)===1?`<span class="badge badge-suspended" title="${esc(p.suspend_reason||'')}">${t('suspended')}</span>`:''}
             <span style="font-size:0.75rem;color:var(--muted);">${fmtDate(p.created_at)}</span>
           </div>
-          <div style="font-size:0.85rem;color:#444;line-height:1.6;">${(p.content||'').replace(/<[^>]+>/g,'').slice(0,120)}${(p.content||'').length>120?'...':''}</div>
+          <div style="font-size:0.85rem;color:#444;line-height:1.6;">${esc((p.content||'').replace(/<[^>]+>/g,'').slice(0,120))}${(p.content||'').length>120?'...':''}</div>
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0;">
           ${Number(p.suspended)===1
